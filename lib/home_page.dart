@@ -11,6 +11,7 @@ class ThingSpeakPage extends StatefulWidget {
 class _ThingSpeakPageState extends State<ThingSpeakPage> {
   late DatabaseReference _databaseReference;
   String moisture = "0.0";
+  num _pump1SwitchState = 0;
 
   @override
   void initState() {
@@ -20,6 +21,22 @@ class _ThingSpeakPageState extends State<ThingSpeakPage> {
       setState(() {
         moisture = event.snapshot.value != null ? event.snapshot.value.toString() : "0.0";
       });
+    });
+  }
+
+  void _changePump1SwitchState(bool value) {
+    setState(() {
+      _pump1SwitchState = value ? 1 : 0;
+    });
+    _databaseReference
+        .root
+        .child('sensorData')
+        .child('pump1')
+        .set(_pump1SwitchState)
+        .then((_) {
+      print('Data sent successfully to /sensorData/pump1');
+    }).catchError((error) {
+      print('Failed to send data to /sensorData/pump1: $error');
     });
   }
 
@@ -72,6 +89,18 @@ class _ThingSpeakPageState extends State<ThingSpeakPage> {
                     ],
                   ),
                 ),
+              ),
+              SizedBox(height: 30),
+              SwitchListTile(
+                title: Text(
+                  'Pump 1',
+                  style: TextStyle(fontSize: 24, color: Colors.white),
+                ),
+                value: _pump1SwitchState == 1,
+                onChanged: _changePump1SwitchState,
+                activeColor: Colors.green,
+                inactiveThumbColor: Colors.grey,
+                inactiveTrackColor: Colors.grey.withOpacity(0.5),
               ),
             ],
           ),
